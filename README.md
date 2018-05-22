@@ -19,12 +19,20 @@ oc project jewzaam
 ```
 
 # Deploy
-First deployment and updates follow the same steps.
+First deployment also requires creation of the app after this step.
 If you've scaled above default 1 pod you'll see a rolling update.
 ```
 docker build . -t jewzaam/go-ping-pong:latest
 docker tag jewzaam/go-ping-pong:latest $(minishift openshift registry)/jewzaam/go-ping-pong:latest
 docker push $(minishift openshift registry)/jewzaam/go-ping-pong:latest
+```
+
+## New App
+Deploy the app, scale to 2 replicas, and expose on port 8080:
+```
+oc new-app jewzaam/go-ping-pong
+oc scale --replicas=2 dc go-ping-pong
+oc expose service go-ping-pong --port=8080
 ```
 
 ## Verify
