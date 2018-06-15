@@ -80,11 +80,11 @@ minishift console --machine-readable | grep CONSOLE_URL | awk -F= '{print $2 "/c
 # Prometheus Integration
 It's assumed you have Prometheus installed.  You can review [OpenShift and Prometheus](https://www.robustperception.io/openshift-and-prometheus/) for some help getting started.
 
-NOTE for this setup to work this project must be in the same namespace as Prometheus.
-
-Once this project is installed you can add 'go-ping-pong' to the prometheus config.
+Once this project is installed you can add 'go-ping-pong' to the prometheus config.  Note this connects to the service (internal), not the route (external), and therefore uses the internal port (8080) and service name (go-ping-pong.jewzaam.svc).
 
 View config map:  `oc describe configMap $(oc get configMap | grep -v NAME | awk '{print $1}')`
 Edit config map:  `oc edit configMap $(oc get configMap | grep -v NAME | awk '{print $1}')`
 
 A sample config is provided in `prometheus.yml`.
+
+Additional network configuration may be necessary if you are monitoring an app outside of the prometheus project and are not using the `ovs-subnet` plugin.  See the [Managing Networking](https://docs.openshift.com/container-platform/3.5/admin_guide/managing_networking.html) documentation on how to [join project networks](https://docs.openshift.com/container-platform/3.5/admin_guide/managing_networking.html#joining-project-networks).
