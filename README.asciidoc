@@ -109,6 +109,7 @@ It's assumed you have Prometheus installed.  You can review [OpenShift and Prome
 Once this project is installed you can add 'go-ping-pong' to the prometheus config.  Note this connects to the service (internal), not the route (external), and therefore uses the internal port (8080) and service name (go-ping-pong.jewzaam.svc).
 
 View config map:  `oc describe configMap $(oc get configMap | grep -v NAME | awk '{print $1}')`
+
 Edit config map:  `oc edit configMap $(oc get configMap | grep -v NAME | awk '{print $1}')`
 
 A sample config is provided in `prometheus.yml`.
