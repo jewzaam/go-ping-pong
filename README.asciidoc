@@ -71,6 +71,10 @@ oc project jewzaam
 ```
 
 = Deploy
+If you are working locally and want to push changes without having to push to master on github use the "Deploy: Manual" option.  For triggered rebuilds use "Deploy: BuildConfig".  Verify steps are the same for both.
+
+== Deploy: Manual
+
 First deployment also requires creation of the app after this step.
 If you've scaled above default 1 pod you'll see a rolling update.
 ```
@@ -83,7 +87,7 @@ docker tag $NAMESPACE/go-ping-pong:latest $(minishift openshift registry)/$NAMES
 docker push $(minishift openshift registry)/$NAMESPACE/go-ping-pong:latest
 ```
 
-== New App
+=== New App
 Only needs to be done for initial deployment.  Subsequent pushes will automatically be deployed.
 
 Deploy the new app, scale to 2 replicas, and expose on port 8080:
@@ -95,6 +99,14 @@ oc new-app $NAMESPACE/go-ping-pong
 oc scale --replicas=2 dc go-ping-pong
 # expose the service on port 8080 (creates a route)
 oc expose service go-ping-pong --port=8080
+```
+
+== Deploy: BuildConfig
+
+Create the build config:
+
+```
+oc create -f oc/buildconfig.yml
 ```
 
 == Verify
