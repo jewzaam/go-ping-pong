@@ -1,0 +1,12 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: go-ping-pong
+spec:
+  port:
+    targetPort: 8080
+  to:
+    kind: Service
+    name: go-ping-pong
+    weight: 100
+  wildcardPolicy: None

@@ -106,7 +106,17 @@ oc expose service go-ping-pong --port=8080
 Create the build config:
 
 ```
-oc create -f oc/buildconfig.yml
+oc create -f oc/build/buildconfig.yml
+```
+
+== Deploy: Deployment
+
+Deploy from remote image on quay.io.  Creates a deployment, service, and route.
+
+```
+oc apply -f oc/build/deployment.yml
+oc apply -f oc/build/service.yml
+oc apply -f oc/build/route.yml
 ```
 
 == Verify

@@ -14,3 +14,6 @@ bin/
 
 # Eclipse project file
 .project
+
+# VS Code
+.vscode

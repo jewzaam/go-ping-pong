@@ -1,0 +1,17 @@
+# vim: expandtab:tabstop=2:shiftwidth=2:autoindent
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+    name: nmalik-go-ping-pong
+    labels:
+        k8s-app: nmalik-go-ping-pong
+spec:
+    selector:
+        matchLabels:
+            app: go-ping-pong
+    endpoints:
+    - port: 8080-tcp
+      interval: 10s
+      honorLabels: true
+
