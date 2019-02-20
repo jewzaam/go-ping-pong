@@ -1,0 +1,160 @@
+# Deploy the app to nmalik-test1 and nmalik-test2
+# Deploy ServiceMonitor only to nmalik-test1
+# Scale replicas on nmalik-test2 to 4 (from 2)
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+    name: jewzaam
+---
+apiVersion: primitives.federation.k8s.io/v1alpha1
+kind: FederatedNamespacePlacement
+metadata:
+  name: jewzaam
+  namespace: jewzaam
+spec:
+  clusterNames:
+    - openshift-hive-nmalik-test1
+    - openshift-hive-nmalik-test2
+  
+  
+---
+apiVersion: primitives.federation.k8s.io/v1alpha1
+Kind: FederatedDeployment
+metadata:
+    name: go-ping-pong
+    namespace: jewzaam
+spec:
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: go-ping-pong
+  spec:
+    selector:
+      matchLabels:
+        app: go-ping-pong
+    replicas: 2
+    template:
+      metadata:
+        labels:
+          app: go-ping-pong
+      spec:
+        containers:
+          - name: go-ping-pong
+            image: quay.io/jewzaam/go-ping-pong:master
+            ports:
+              - containerPort: 8080
+---
+apiVersion: primitives.federation.k8s.io/v1alpha1
+kind: FederatedDeploymentPlacement
+metadata:
+  name: go-ping-pong
+  namespace: jewzaam
+spec:
+  clusterSelector: {}
+  
+
+---
+apiVersion: primitives.federation.k8s.io/v1alpha1
+kind: FederatedService
+metadata:
+  name: go-ping-pong
+  namespace: jewzaam
+spec:
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: go-ping-pong
+  spec:
+    selector:
+      app: go-ping-pong
+    ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 8080
+---
+apiVersion: primitives.federation.k8s.io/v1alpha1
+kind: FederatedServicePlacement
+metadata:
+  name: go-ping-pong
+  namespace: jewzaam
+spec:
+  clusterSelector: {}
+
+
+
+---
+apiVersion: primitives.federation.k8s.io/v1alpha1
+kind: FederatedRoute
+metadata:
+  name: go-ping-pong
+  namespace: jewzaam
+spec:
+  apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    name: go-ping-pong
+  spec:
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: go-ping-pong
+      weight: 100
+    wildcardPolicy: None
+---
+apiVersion: primitives.federation.k8s.io/v1alpha1
+kind: FederatedRoutePlacement
+metadata:
+  name: go-ping-pong
+  namespace: jewzaam
+spec:
+  clusterSelector: {}
+
+
+---
+apiVersion: primitives.federation.k8s.io/v1alpha1
+kind: FederatedServiceMonitor
+metadata:
+  name: go-ping-pong
+  namespace: jewzaam
+spec:
+  apiVersion: monitoring.coreos.com/v1
+  kind: ServiceMonitor
+  metadata:
+      name: nmalik-go-ping-pong
+      labels:
+          k8s-app: nmalik-go-ping-pong
+  spec:
+      selector:
+          matchLabels:
+              app: go-ping-pong
+      endpoints:
+      - port: 8080-tcp
+        interval: 10s
+        honorLabels: true
+---
+apiVersion: primitives.federation.k8s.io/v1alpha1
+kind: FederatedServiceMonitorPlacement
+metadata:
+  name: go-ping-pong
+  namespace: jewzaam
+spec:
+  clusterNames:
+    - openshift-hive-nmalik-test1
+
+
+---
+apiVersion: primitives.federation.k8s.io/v1alpha1
+kind: FederatedDeploymentOverride
+metadata:
+  name: go-ping-pong
+  namespace: jewzaam
+spec:
+  overrides:
+  - clusterName: openshift-hive-nmalik-test2
+    clusterOverrides:
+    - path: spec.replicas
+      value: 4
+
