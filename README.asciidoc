@@ -21,6 +21,8 @@ endif::[]
 // $ gem install asciidoctor-diagram
 // $ asciidoctor -o /dev/null -r asciidoctor-diagram security/ldap_authorization.asciidoc
 
+image:https://quay.io/repository/jewzaam/go-ping-pong/status["Docker Repository on Quay", link="https://quay.io/repository/jewzaam/go-ping-pong"]
+
 toc::[]
 
 
