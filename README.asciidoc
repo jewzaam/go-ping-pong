@@ -116,9 +116,7 @@ oc create -f oc/build/buildconfig.yml
 Deploy from remote image on quay.io.  Creates a deployment, service, and route.
 
 ```
-oc apply -f oc/build/deployment.yml
-oc apply -f oc/build/service.yml
-oc apply -f oc/build/route.yml
+oc apply -f oc/deployment/
 ```
 
 == Verify

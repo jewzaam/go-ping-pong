@@ -17,4 +17,16 @@ spec:
           image: quay.io/jewzaam/go-ping-pong:master
           ports:
             - containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 2
+        
 
