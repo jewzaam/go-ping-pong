@@ -1,11 +1,8 @@
-FROM golang:1.9
+FROM golang:1.22
 
 USER nobody
 
 EXPOSE 8080/tcp
-
-# get the golang prometheus client
-RUN go get github.com/prometheus/client_golang/prometheus
 
 # setup this application
 RUN mkdir -p /go/src/github.com/jewzaam/go-ping-pong

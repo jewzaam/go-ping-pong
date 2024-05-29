@@ -1,35 +1,8 @@
-// begin header
-ifdef::env-github[]
-:tip-caption: :bulb:
-:note-caption: :information_source:
-:important-caption: :heavy_exclamation_mark:
-:caution-caption: :fire:
-:warning-caption: :warning:
-endif::[]
-:numbered:
-:toc: macro
-:toc-title: pass:[<b>Table of Contents</b>]
-// end header
-
-// NOTE: ditaa_diagrams
-// if you make changes to the ASCII-art diagrams in this document,
-// you must recreate the associated PNG files and check the changed
-// versions in in with your changes so that the updated
-// diagrams will show up in the online version of the documents
-// Here's how to do it on a Fedora system:
-// $ sudo dnf install ditaa asciidoctor
-// $ gem install asciidoctor-diagram
-// $ asciidoctor -o /dev/null -r asciidoctor-diagram security/ldap_authorization.asciidoc
-
-image:https://quay.io/repository/jewzaam/go-ping-pong/status["Docker Repository on Quay", link="https://quay.io/repository/jewzaam/go-ping-pong"]
-
-toc::[]
-
 
 A very simple app that listens on port 8080.
 Any request query path is logged and sent as a response to the client with a "Pong" prefix.
 
-= Local Test
+# Local Test
 Run without using docker or openshift:
 
 ```
@@ -46,12 +19,45 @@ Pong: "/it-works"
 
 The `/metrics` endpoint will return Prometheus style metrics.
 
-= Using on minishift
+# Using on minikube
 
-== Prereqs
+## Prereqs
+
+```
+minikube start
+```
+
+## Build and Push
+
+```
+NAMESPACE=jewzaam
+# build the image
+docker build . -t $(minikube ip):5000/$NAMESPACE/go-ping-pong:latest
+# push it
+docker push $(minikube ip):5000/$NAMESPACE/go-ping-pong:latest
+```
+
+## Deploy
+
+```
+oc create -f oc/deployment/01-deployment.yml
+oc create -f oc/deployment/02-service.yml
+```
+
+## Test
+
+```
+oc port-forward $(oc get pods -l=app=go-ping-pong -o name) 8080:8080 &
+curl localhost:8080/hello
+```
+
+# Using on minishift
+
+## Prereqs
 Required for all other sections, you need minishift running, the docker-env setup, and need to be logged in.
 First, [Install Minishift](https://docs.openshift.org/latest/minishift/getting-started/installing.html)
 Then...
+
 ```
 minishift start
 # setup docker env to use the minishift docker
@@ -63,22 +69,8 @@ oc login -u developer
 docker login -u $(oc whoami) -p $(oc whoami -t) $(minishift openshift registry)
 ```
 
-== New project
-For the initial setup, create the project.  First deployment is the same as pushing an update.
-```
-# create the project
-oc new-project jewzaam
-# switch to use the new project
-oc project jewzaam
-```
+## Build and Push
 
-= Deploy
-If you are working locally and want to push changes without having to push to master on github use the "Deploy: Manual" option.  For triggered rebuilds use "Deploy: BuildConfig".  Verify steps are the same for both.
-
-== Deploy: Manual
-
-First deployment also requires creation of the app after this step.
-If you've scaled above default 1 pod you'll see a rolling update.
 ```
 NAMESPACE=jewzaam
 # build the image
@@ -89,7 +81,11 @@ docker tag $NAMESPACE/go-ping-pong:latest $(minishift openshift registry)/$NAMES
 docker push $(minishift openshift registry)/$NAMESPACE/go-ping-pong:latest
 ```
 
-=== New App
+# Deploy
+If you are working locally and want to push changes without having to push to master on github use the "Deploy: Manual" option.  For triggered rebuilds use "Deploy: BuildConfig".  Verify steps are the same for both.
+
+
+## New App (minishift)
 Only needs to be done for initial deployment.  Subsequent pushes will automatically be deployed.
 
 Deploy the new app, scale to 2 replicas, and expose on port 8080:
@@ -103,7 +99,7 @@ oc scale --replicas=2 dc go-ping-pong
 oc expose service go-ping-pong --port=8080
 ```
 
-== Deploy: BuildConfig
+## Deploy: BuildConfig (minishift)
 
 Create the build config:
 
@@ -111,7 +107,7 @@ Create the build config:
 oc create -f oc/build/buildconfig.yml
 ```
 
-== Deploy: Deployment
+## Deploy: Deployment (minishift)
 
 Deploy from remote image on quay.io.  Creates a deployment, service, and route.
 
@@ -119,13 +115,13 @@ Deploy from remote image on quay.io.  Creates a deployment, service, and route.
 oc apply -f oc/deployment/
 ```
 
-== Verify
+## Verify
 View project by using this URL:
 ```
 minishift console --machine-readable | grep CONSOLE_URL | awk -F= '{print $2 "/console/project/jewzaam/overview"}'
 ```
 
-= Prometheus Integration
+# Prometheus Integration (broken)
 It's assumed you have Prometheus installed.  You can review [OpenShift and Prometheus](https://www.robustperception.io/openshift-and-prometheus/) for some help getting started.
 
 Once this project is installed you can add 'go-ping-pong' to the prometheus config.  Note this connects to the service (internal), not the route (external), and therefore uses the internal port (8080) and service name (go-ping-pong.jewzaam.svc).
